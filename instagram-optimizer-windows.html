@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Foto-Optimierer</title>
+    <style>
+        :root {
+            --instagram-gradient-start: #405DE6;
+            --instagram-gradient-mid: #C13584;
+            --instagram-gradient-end: #FFDC80;
+            --dark-text: #262626;
+            --light-text: #ffffff;
+            --background: #fafafa;
+            --card-bg: #ffffff;
+            --border-color: #dbdbdb;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background);
+            color: var(--dark-text);
+            line-height: 1.5;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, var(--instagram-gradient-start), var(--instagram-gradient-mid), var(--instagram-gradient-end));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 15px 80px 15px;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-weight: 600;
+            font-size: 18px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--dark-text);
+        }
+        
+        .image-preview-container {
+            position: relative;
+            width: 100%;
+            max-height: 400px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            max-height: 400px;
+            display: none;
+        }
+        
+        .placeholder {
+            width: 100%;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #8e8e8e;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .placeholder svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 10px;
+            fill: #8e8e8e;
+        }
+        
+        .file-input-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .file-input-label {
+            display: block;
+            background: linear-gradient(45deg, var(--instagram-gradient-start), var(--instagram-gradient-mid));
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .file-input-label:hover {
+            opacity: 0.9;
+        }
+        
+        .file-input {
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+        
+        .settings-group {
+            margin-bottom: 20px;
+        }
+        
+        .setting-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .radio-option {
+            flex: 1;
+            min-width: 80px;
+        }
+        
+        .radio-input {
+            display: none;
+        }
+        
+        .radio-label {
+            display: block;
+            padding: 8px 5px;
+            text-align: center;
+            background-color: #f0f0f0;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .radio-input:checked + .radio-label {
+            background-color: var(--instagram-gradient-mid);
+            color: white;
+        }
+        
+        .slider-container {
+            margin-bottom: 15px;
+        }
+        
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .slider-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--instagram-gradient-mid);
+        }
+        
+        .range-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+        }
+        
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--instagram-gradient-mid);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        .switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .switch-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--instagram-gradient-mid);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        
+        .optimize-button {
+            display: block;
+            width: 100%;
+            background: linear-gradient(45deg, var(--instagram-gradient-start), var(--instagram-gradient-mid), var(--instagram-gradient-end));
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .optimize-button:hover {
+            opacity: 0.9;
+        }
+        
+        .optimize-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .output-section {
+            display: none;
+        }
+        
+        .output-container {
+            width: 100%;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+        
+        .output-image {
+            max-width: 100%;
+            max-height: 400px;
+        }
+        
+        .download-button {
+            display: block;
+            width: 100%;
+            background-color: #000000;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .download-button:hover {
+            background-color: #333333;
+        }
+        
+        .tip-card {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffca28;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+        }
+        
+        .tip-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 0;
+            margin-bottom: 5px;
+            color: #f57c00;
+        }
+        
+        .tip-content {
+            font-size: 13px;
+            color: #5f4b32;
+            margin: 0;
+        }
+        
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--instagram-gradient-start), var(--instagram-gradient-mid));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--instagram-gradient-mid);
+        }
+        
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .preset-button {
+            flex: 1;
+            min-width: 80px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .preset-button:hover {
+            background-color: #e5e5e5;
+        }
+        
+        .preset-button.active {
+            background-color: var(--instagram-gradient-mid);
+            color: white;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">InstaPerfect</div>
+        <div class="subtitle">Optimiere deine Fotos für Instagram</div>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <h2 class="card-title">Foto auswählen</h2>
+            
+            <div class="image-preview-container">
+                <div class="placeholder" id="placeholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                    </svg>
+                    <p>Klicke, um ein Foto auszuwählen</p>
+                </div>
+                <img id="preview" class="image-preview" alt="Vorschau">
+            </div>
+            
+            <div class="file-input-container">
+                <label for="file-selector" class="file-input-label">Foto auswählen</label>
+                <input type="file" id="file-selector" class="file-input" accept="image/*">
+            </div>
+        </div>
+        
+        <div class="tip-card">
+            <h3 class="tip-title">Instagram-Tipp:</h3>
+            <p class="tip-content">Die optimale Bildgröße für Instagram-Posts ist 1080 × 1080 Pixel (quadratisch). Diese App passt dein Foto automatisch auf diese Auflösung an für maximale Qualität.</p>
+        </div>
+        
+        <div class="card" id="settings-card">
+            <h2 class="card-title">Optimierungseinstellungen</h2>
+            
+            <div class="preset-buttons">
+                <button class="preset-button" id="preset-vibrant">Lebhaft</button>
+                <button class="preset-button" id="preset-portrait">Portrait</button>
+                <button class="preset-button" id="preset-clean">Clean</button>
+                <button class="preset-button" id="preset-vintage">Vintage</button>
+            </div>
+            
+            <div class="settings-group">
+                <label class="setting-label">Format wählen:</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="format-square" name="format" value="square" class="radio-input" checked>
+                        <label for="format-square" class="radio-label">Quadratisch</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="format-portrait" name="format" value="portrait" class="radio-input">
+                        <label for="format-portrait" class="radio-label">Portrait</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="format-landscape" name="format" value="landscape" class="radio-input">
+                        <label for="format-landscape" class="radio-label">Landscape</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slider-container">
+                <div class="slider-header">
+                    <label class="setting-label" for="brightness">Helligkeit</label>
+                    <span class="slider-value" id="brightness-value">0</span>
+                </div>
+                <input type="range" id="brightness" class="range-slider" min="-50" max="50" value="0">
+            </div>
+            
+            <div class="slider-container">
+                <div class="slider-header">
+                    <label class="setting-label" for="contrast">Kontrast</label>
+                    <span class="slider-value" id="contrast-value">0</span>
+                </div>
+                <input type="range" id="contrast" class="range-slider" min="-50" max="50" value="0">
+            </div>
+            
+            <div class="slider-container">
+                <div class="slider-header">
+                    <label class="setting-label" for="saturation">Sättigung</label>
+                    <span class="slider-value" id="saturation-value">0</span>
+                </div>
+                <input type="range" id="saturation" class="range-slider" min="-50" max="50" value="0">
+            </div>
+            
+            <div class="slider-container">
+                <div class="slider-header">
+                    <label class="setting-label" for="sharpness">Schärfe</label>
+                    <span class="slider-value" id="sharpness-value">0</span>
+                </div>
+                <input type="range" id="sharpness" class="range-slider" min="0" max="100" value="0">
+            </div>
+            
+            <div class="switch-container">
+                <span class="switch-label">Automatische Verbesserung</span>
+                <label class="switch">
+                    <input type="checkbox" id="auto-enhance" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="switch-container">
+                <span class="switch-label">Maximale Auflösung</span>
+                <label class="switch">
+                    <input type="checkbox" id="high-res" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <button class="optimize-button" id="optimize-btn" disabled>Foto optimieren</button>
+            
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-text" id="progress-text">Optimierung läuft...</div>
+            </div>
+        </div>
+        
+        <div class="card output-section" id="output-section">
+            <h2 class="card-title">Instagram-Ready!</h2>
+            
+            <div class="output-container">
+                <img id="output-image" class="output-image" alt="Optimiertes Bild">
+            </div>
+            
+            <div class="result-info" id="result-info">
+                Größe: 1080 × 1080 px | Optimiert für Instagram
+            </div>
+            
+            <button class="download-button" id="download-btn">Als Foto speichern</button>
+        </div>
+    </div>
+    
+    <footer>
+        &copy; 2025 InstaPerfect | Optimiere deine Fotos für Instagram
+    </footer>
+
+    <!-- Skripte aufgeteilt für bessere Verarbeitung -->
+    <script>
+    // Grundlegende DOM-Elemente und Variablen
+    const fileSelector = document.getElementById('file-selector');
+    const preview = document.getElementById('preview');
+    const placeholder = document.getElementById('placeholder');
+    const optimizeBtn = document.getElementById('optimize-btn');
+    const progressContainer = document.getElementById('progress-container');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    const outputSection = document.getElementById('output-section');
+    const outputImage = document.getElementById('output-image');
+    const resultInfo = document.getElementById('result-info');
+    const downloadBtn = document.getElementById('download-btn');
+    
+    // Einstellungen
+    const brightnessSlider = document.getElementById('brightness');
+    const contrastSlider = document.getElementById('contrast');
+    const saturationSlider = document.getElementById('saturation');
+    const sharpnessSlider = document.getElementById('sharpness');
+    const autoEnhanceCheckbox = document.getElementById('auto-enhance');
+    const highResCheckbox = document.getElementById('high-res');
+    
+    // Presets
+    const presetVibrant = document.getElementById('preset-vibrant');
+    const presetPortrait = document.getElementById('preset-portrait');
+    const presetClean = document.getElementById('preset-clean');
+    const presetVintage = document.getElementById('preset-vintage');
+    
+    // Format
+    const formatSquare = document.getElementById('format-square');
+    const formatPortrait = document.getElementById('format-portrait');
+    const formatLandscape = document.getElementById('format-landscape');
+    
+    // Werte anzeigen
+    const brightnessValue = document.getElementById('brightness-value');
+    const contrastValue = document.getElementById('contrast-value');
+    const saturationValue = document.getElementById('saturation-value');
+    const sharpnessValue = document.getElementById('sharpness-value');
+    
+    let originalImage = null;
+    let resultCanvas = null;
+    </script>
+
+    <script>
+    // Event-Listener und UI-Interaktionen
+    
+    // Datei-Upload-Handling
+    fileSelector.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        // Nur Bilder erlauben
+        if (!file.type.match('image.*')) {
+            alert('Bitte wähle ein Bild aus.');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            originalImage = new Image();
+            originalImage.onload = function() {
+                preview.src = originalImage.src;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+                optimizeBtn.disabled = false;
+            };
+            originalImage.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+    
+    // Klick auf Platzhalter löst Dateiauswahl aus
+    placeholder.addEventListener('click', function() {
+        fileSelector.click();
+    });
+    
+    // Preset-Buttons
+    presetVibrant.addEventListener('click', function() {
+        setPreset('vibrant');
+        highlightPreset(presetVibrant);
+    });
+    
+    presetPortrait.addEventListener('click', function() {
+        setPreset('portrait');
+        highlightPreset(presetPortrait);
+    });
+    
+    presetClean.addEventListener('click', function() {
+        setPreset('clean');
+        highlightPreset(presetClean);
+    });
+    
+    presetVintage.addEventListener('click', function() {
+        setPreset('vintage');
+        highlightPreset(presetVintage);
+    });
+    
+    function highlightPreset(button) {
+        // Alle Preset-Buttons zurücksetzen
+        presetVibrant.classList.remove('active');
+        presetPortrait.classList.remove('active');
+        presetClean.classList.remove('active');
+        presetVintage.classList.remove('active');
+        
+        // Ausgewählten Button hervorheben
+        button.classList.add('active');
+    }
+    
+    function setPreset(preset) {
+        switch(preset) {
+            case 'vibrant':
+                brightnessSlider.value = 10;
+                contrastSlider.value = 15;
+                saturationSlider.value = 25;
+                sharpnessSlider.value = 30;
+                break;
+            case 'portrait':
+                brightnessSlider.value = 5;
+                contrastSlider.value = 10;
+                saturationSlider.value = -5;
+                sharpnessSlider.value = 40;
+                formatPortrait.checked = true;
+                break;
+            case 'clean':
+                brightnessSlider.value = 0;
+                contrastSlider.value = 5;
+                saturationSlider.value = 0;
+                sharpnessSlider.value = 20;
+                break;
+            case 'vintage':
+                brightnessSlider.value = -5;
+                contrastSlider.value = 10;
+                saturationSlider.value = -15;
+                sharpnessSlider.value = 10;
+                break;
+        }
+        
+        // Update der angezeigten Werte
+        updateSliderValues();
+    }
+    
+    // Aktualisiert die angezeigten Werte bei Änderung der Schieberegler
+    function updateSliderValues() {
+        brightnessValue.textContent = brightnessSlider.value > 0 ? '+' + brightnessSlider.value : brightnessSlider.value;
+        contrastValue.textContent = contrastSlider.value > 0 ? '+' + contrastSlider.value : contrastSlider.value;
+        saturationValue.textContent = saturationSlider.value > 0 ? '+' + saturationSlider.value : saturationSlider.value;
+        sharpnessValue.textContent = sharpnessSlider.value;
+    }
+    
+    // Slider-Event-Listener
+    brightnessSlider.addEventListener('input', updateSliderValues);
+    contrastSlider.addEventListener('input', updateSliderValues);
+    saturationSlider.addEventListener('input', updateSliderValues);
+    sharpnessSlider.addEventListener('input', updateSliderValues);
+    
+    // Initial die Werte aktualisieren
+    updateSliderValues();
+    
+    // Download-Button klicken
+    downloadBtn.addEventListener('click', function() {
+        if (!resultCanvas) return;
+        
+        const quality = highResCheckbox.checked ? 0.95 : 0.85;
+        
+        const link = document.createElement('a');
+        link.download = 'instagram_optimized.jpg';
+        link.href = resultCanvas.toDataURL('image/jpeg', quality);
+        link.click();
+    });
+    </script>
+
+    <script>
+    // Bildverarbeitungsfunktionen
+
+    // Optimize-Button klicken
+    optimizeBtn.addEventListener('click', function() {
+        if (!originalImage) {
+            alert('Bitte wähle zuerst ein Foto aus.');
+            return;
+        }
+        
+        // Zeige Fortschrittsanzeige
+        progressContainer.style.display = 'block';
+        progressFill.style.width = '0%';
+        progressText.textContent = 'Optimierung läuft...';
+        
+        // Starte den Optimierungs-Prozess
+        setTimeout(() => {
+            optimizeImage();
+        }, 100);
+    });
+
+    // Bild optimieren
+    function optimizeImage() {
+        // Fortschritt simulieren
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 5;
+            progressFill.style.width = `${progress}%`;
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+                processImage();
+            }
+        }, 50);
+    }
+
+    // Hauptbildverarbeitungsfunktion
+    function processImage() {
+        // Ermittle das gewählte Format
+        let targetWidth, targetHeight;
+        if (formatSquare.checked) {
+            targetWidth = targetHeight = 1080; // Quadrat für Instagram
+        } else if (formatPortrait.checked) {
+            targetWidth = 1080;
+            targetHeight = 1350; // Portrait-Format für Instagram
+        } else if (formatLandscape.checked) {
+            targetWidth = 1080;
+            targetHeight = 608; // Landscape-Format für Instagram
+        }
+        
+        // Erstelle Canvas für die Bildbearbeitung
+        resultCanvas = document.createElement('canvas');
+        resultCanvas.width = targetWidth;
+        resultCanvas.height = targetHeight;
+        
+        const ctx = resultCanvas.getContext('2d');
+        
+        // Berechne Skalierung und Position für Bild-Fitting
+        const sourceAspect = originalImage.width / originalImage.height;
+        const targetAspect = targetWidth / targetHeight;
+        
+        let sWidth, sHeight, sx, sy;
+        
+        if (sourceAspect > targetAspect) {
+            // Bild ist breiter als Zielformat
+            sHeight = originalImage.height;
+            sWidth = originalImage.height * targetAspect;
+            sx = (originalImage.width - sWidth) / 2;
+            sy = 0;
+        } else {
+            // Bild ist höher als Zielformat
+            sWidth = originalImage.width;
+            sHeight = originalImage.width / targetAspect;
+            sx = 0;
+            sy = (originalImage.height - sHeight) / 2;
+        }
+        
+        // Zeichne das Bild auf den Canvas mit den gewählten Einstellungen
+        ctx.drawImage(originalImage, sx, sy, sWidth, sHeight, 0, 0, targetWidth, targetHeight);
+        
+        // Hole Bildwerte für die Filter
+        const brightnessValue = parseInt(brightnessSlider.value);
+        const contrastValue = parseInt(contrastSlider.value);
+        const saturationValue = parseInt(saturationSlider.value);
+        const sharpnessValue = parseInt(sharpnessSlider.value);
+        
+        // Hole die Bilddaten für Filter
+        let imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+        let data = imageData.data;
+        
+        // Berechne Filterfaktoren
+        const brightnessF = 1 + brightnessValue / 100;
+        const contrastF = 1 + contrastValue / 100;
+        const saturationF = 1 + saturationValue / 100;
+        
+        // Für jeden Pixel das Filter anwenden
+        for (let i = 0; i < data.length; i += 4) {
+            // RGB-Werte extrahieren
+            let r = data[i];
+            let g = data[i + 1];
+            let b = data[i + 2];
+            
+            // Helligkeit anwenden
+            r *= brightnessF;
+            g *= brightnessF;
+            b *= brightnessF;
+            
+            // Kontrast anwenden
+            r = (r - 128) * contrastF + 128;
+            g = (g - 128) * contrastF + 128;
+            b = (b - 128) * contrastF + 128;
+            
+            // Sättigung anwenden
+            const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+            r = luminance + saturationF * (r - luminance);
+            g = luminance + saturationF * (g - luminance);
+            b = luminance + saturationF * (b - luminance);
+            
+            // Werte begrenzen
+            data[i] = Math.max(0, Math.min(255, r));
+            data[i + 1] = Math.max(0, Math.min(255, g));
+            data[i + 2] = Math.max(0, Math.min(255, b));
+        }
+        
+        // Auto-Enhance anwenden, wenn aktiviert
+        if (autoEnhanceCheckbox.checked) {
+            // Einfache Auto-Verbesserung durch Histogram Stretching
+            let minR = 255, maxR = 0, minG = 255, maxG = 0, minB = 255, maxB = 0;
+            
+            // Finde Min/Max für jede Farbkomponente
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                
+                minR = Math.min(minR, r);
+                maxR = Math.max(maxR, r);
+                minG = Math.min(minG, g);
+                maxG = Math.max(maxG, g);
+                minB = Math.min(minB, b);
+                maxB = Math.max(maxB, b);
+            }
+            
+            // Normalisiere den Farbbereich
+            const rangeR = maxR - minR;
+            const rangeG = maxG - minG;
+            const rangeB = maxB - minB;
+            
+            if (rangeR > 0 && rangeG > 0 && rangeB > 0) {
+                for (let i = 0; i < data.length; i += 4) {
+                    data[i] = ((data[i] - minR) / rangeR) * 255;
+                    data[i + 1] = ((data[i + 1] - minG) / rangeG) * 255;
+                    data[i + 2] = ((data[i + 2] - minB) / rangeB) * 255;
+                }
+            }
+        }
+        
+        // Schreibe die veränderten Daten zurück
+        ctx.putImageData(imageData, 0, 0);
+        
+        // Füge einfache Schärfe hinzu, wenn gewünscht
+        if (sharpnessValue > 0) {
+            // Einfache Schärfe durch Kontrast an Kanten
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = targetWidth;
+            tempCanvas.height = targetHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // Kopiere das aktuelle Bild
+            tempCtx.drawImage(resultCanvas, 0, 0);
+            
+            // Wende einen leichten Weichzeichner an
+            ctx.filter = `blur(1px)`;
+            ctx.drawImage(tempCanvas, 0, 0);
+            
+            // Mische das Original mit dem weichgezeichneten Bild
+            ctx.globalCompositeOperation = 'difference';
+            ctx.globalAlpha = sharpnessValue / 100;
+            ctx.drawImage(tempCanvas, 0, 0);
+            
+            // Zurücksetzen
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = 1;
+            ctx.filter = 'none';
+        }
+        
+        // Zeige das optimierte Bild an
+        outputImage.src = resultCanvas.toDataURL('image/jpeg', 0.95);
+        outputSection.style.display = 'block';
+        
+        // Scrolle zum Ergebnis
+        outputSection.scrollIntoView({ behavior: 'smooth' });
+        
+        // Aktualisiere Ergebnis-Info
+        resultInfo.textContent = `Größe: ${targetWidth} × ${targetHeight} px | Optimiert für Instagram`;
+        
+        // Verstecke Fortschrittsanzeige
+        progressContainer.style.display = 'none';
+    }
