@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram Foto-Optimierer</title>
+    <title>Social Media Foto-Optimierer</title>
     <style>
         :root {
             --instagram-gradient-start: #405DE6;
             --instagram-gradient-mid: #C13584;
             --instagram-gradient-end: #FFDC80;
+            --pinterest-color: #E60023;
+            --linkedin-color: #0077B5;
             --dark-text: #262626;
             --light-text: #ffffff;
             --background: #fafafa;
@@ -105,7 +107,7 @@
             margin-bottom: 20px;
         }
 
-        .platform-selector, .aspect-ratio-selector {
+        .platform-selector, .aspect-ratio-selector, .linkedin-type-selector {
             margin-bottom: 15px;
         }
 
@@ -113,6 +115,7 @@
             display: flex;
             gap: 15px;
             margin-top: 8px;
+            flex-wrap: wrap;
         }
 
         .radio-option {
@@ -163,6 +166,65 @@
             to { transform: rotate(360deg); }
         }
 
+        .platform-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .btn-instagram {
+            background: linear-gradient(45deg, #405DE6, #C13584);
+        }
+
+        .btn-pinterest {
+            background-color: var(--pinterest-color);
+        }
+
+        .btn-linkedin {
+            background-color: var(--linkedin-color);
+        }
+
+        .platform-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .platform-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.3s;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+        }
+
+        .platform-tab.active {
+            opacity: 1;
+            border-bottom-color: var(--instagram-gradient-mid);
+        }
+
+        .platform-tab[data-platform="instagram"].active {
+            border-bottom-color: var(--instagram-gradient-mid);
+        }
+
+        .platform-tab[data-platform="pinterest"].active {
+            border-bottom-color: var(--pinterest-color);
+        }
+
+        .platform-tab[data-platform="linkedin"].active {
+            border-bottom-color: var(--linkedin-color);
+        }
+
+        .platform-content {
+            display: none;
+        }
+
+        .platform-content.active {
+            display: block;
+        }
+
         @media (max-width: 600px) {
             .container {
                 padding: 10px;
@@ -175,13 +237,25 @@
             .preview-item {
                 min-width: 100%;
             }
+
+            .platform-tabs {
+                flex-direction: column;
+                border-bottom: none;
+            }
+
+            .platform-tab {
+                padding: 8px;
+                text-align: center;
+                border-bottom: none;
+                border-left: 3px solid transparent;
+            }
         }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>Instagram & Pinterest Foto-Optimierer</h1>
+            <h1>Social Media Foto-Optimierer</h1>
         </div>
     </header>
 
@@ -189,32 +263,66 @@
         <div class="card">
             <h2>Optimiere deine Fotos für Social Media</h2>
             
+            <div class="platform-tabs">
+                <div class="platform-tab active" data-platform="instagram">Instagram</div>
+                <div class="platform-tab" data-platform="pinterest">Pinterest</div>
+                <div class="platform-tab" data-platform="linkedin">LinkedIn</div>
+            </div>
+            
             <div class="options-container">
-                <div class="platform-selector">
-                    <h3>Plattform auswählen</h3>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="platform" value="instagram" checked> Instagram
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="platform" value="pinterest"> Pinterest
-                        </label>
+                <div class="platform-content active" id="instagram-content">
+                    <h3>Instagram Optimierung</h3>
+                    <div class="aspect-ratio-selector">
+                        <h4>Seitenverhältnis</h4>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="aspect_ratio" value="1:1" checked> Quadratisch (1:1)
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="aspect_ratio" value="4:5"> Portrait (4:5)
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="aspect_ratio" value="16:9"> Landscape (16:9)
+                            </label>
+                        </div>
                     </div>
+                    <p>
+                        <strong>Optimierungen:</strong> Helligkeit (+20%), Kontrast (+20%), 
+                        Farbsättigung (+10%), Schärfe (+30%)
+                    </p>
                 </div>
                 
-                <div class="aspect-ratio-selector" id="instagram-options">
-                    <h3>Seitenverhältnis</h3>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="aspect_ratio" value="1:1" checked> Quadratisch (1:1)
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="aspect_ratio" value="4:5"> Portrait (4:5)
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="aspect_ratio" value="16:9"> Landscape (16:9)
-                        </label>
+                <div class="platform-content" id="pinterest-content">
+                    <h3>Pinterest Optimierung</h3>
+                    <p>
+                        <strong>Seitenverhältnis:</strong> 2:3 (vertikales Format)
+                    </p>
+                    <p>
+                        <strong>Optimierungen:</strong> Helligkeit (+10%), Kontrast (+30%), 
+                        Farbsättigung (+20%), Schärfe (+40%)
+                    </p>
+                </div>
+                
+                <div class="platform-content" id="linkedin-content">
+                    <h3>LinkedIn Optimierung</h3>
+                    <div class="linkedin-type-selector">
+                        <h4>Content-Typ</h4>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="linkedin_type" value="profile" checked> Profilbild (1:1)
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="linkedin_type" value="post"> Beitragsbild (1.9:1)
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="linkedin_type" value="banner"> Titelbild (4:1)
+                            </label>
+                        </div>
                     </div>
+                    <p>
+                        <strong>Professionelle Optimierungen:</strong> Gedämpfte Sättigung, erhöhter Kontrast,
+                        verbesserte Schatten, leichte Vignette
+                    </p>
                 </div>
             </div>
             
@@ -235,12 +343,13 @@
         </div>
         
         <div class="card">
-            <h2>Vorteile des Foto-Optimierers</h2>
+            <h2>Vorteile unseres Foto-Optimierers</h2>
             <ul>
                 <li>Automatische Anpassung für ideales Seitenverhältnis</li>
                 <li>Optimierte Bildqualität für bessere Sichtbarkeit</li>
                 <li>Farbverbesserungen für mehr Engagement</li>
-                <li>Plattformspezifische Optimierung für Instagram und Pinterest</li>
+                <li>Plattformspezifische Optimierung für Instagram, Pinterest und LinkedIn</li>
+                <li>Professionelle Bildverbesserungen für Business-Anwendungen</li>
             </ul>
         </div>
     </div>
@@ -253,19 +362,32 @@
             const previewContainer = document.getElementById('preview-container');
             const processBtnContainer = document.getElementById('process-btn-container');
             const processBtn = document.getElementById('process-btn');
-            const platformRadios = document.querySelectorAll('input[name="platform"]');
-            const instagramOptions = document.getElementById('instagram-options');
+            const platformTabs = document.querySelectorAll('.platform-tab');
+            const platformContents = document.querySelectorAll('.platform-content');
             
             let uploadedFile = null;
+            let selectedPlatform = 'instagram';
             
-            // Platform selection
-            platformRadios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    if (this.value === 'instagram') {
-                        instagramOptions.style.display = 'block';
-                    } else {
-                        instagramOptions.style.display = 'none';
-                    }
+            // Platform tab switching
+            platformTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Update active tab
+                    platformTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update active content
+                    const platform = this.dataset.platform;
+                    selectedPlatform = platform;
+                    
+                    platformContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    document.getElementById(`${platform}-content`).classList.add('active');
+                    
+                    // Change button style based on platform
+                    processBtn.className = 'btn';
+                    processBtn.classList.add(`btn-${platform}`);
                 });
             });
             
@@ -349,11 +471,14 @@
             processBtn.addEventListener('click', function() {
                 if (!uploadedFile) return;
                 
-                const platform = document.querySelector('input[name="platform"]:checked').value;
+                const platform = selectedPlatform;
                 let aspectRatio = '1:1';
+                let linkedinType = 'post';
                 
                 if (platform === 'instagram') {
                     aspectRatio = document.querySelector('input[name="aspect_ratio"]:checked').value;
+                } else if (platform === 'linkedin') {
+                    linkedinType = document.querySelector('input[name="linkedin_type"]:checked').value;
                 }
                 
                 processBtn.disabled = true;
@@ -361,13 +486,15 @@
                 // Add spinner
                 const spinner = document.createElement('span');
                 spinner.className = 'spinner';
-                processBtn.prepend(spinner);
-                processBtn.textContent = ' Wird optimiert...';
+                processBtn.innerHTML = '';
+                processBtn.appendChild(spinner);
+                processBtn.appendChild(document.createTextNode(' Wird optimiert...'));
                 
                 const formData = new FormData();
                 formData.append('file', uploadedFile);
                 formData.append('platform', platform);
                 formData.append('aspect_ratio', aspectRatio);
+                formData.append('linkedin_type', linkedinType);
                 
                 fetch('/upload', {
                     method: 'POST',
@@ -426,7 +553,7 @@
                 
                 const downloadBtn = document.createElement('a');
                 downloadBtn.href = data.download_url;
-                downloadBtn.className = 'btn';
+                downloadBtn.className = `btn btn-${selectedPlatform}`;
                 downloadBtn.textContent = 'Herunterladen';
                 downloadBtn.style.marginTop = '10px';
                 downloadBtn.style.display = 'inline-block';
