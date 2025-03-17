@@ -4,7 +4,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
 import os
 from werkzeug.utils import secure_filename
-from PIL import Image, ImageEnhance, ImageFilter
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 import numpy as np
 import io
 import uuid
@@ -106,6 +106,80 @@ def optimize_for_pinterest(img):
     
     return img
 
+def optimize_for_linkedin(img, content_type="post"):
+    """Optimize image for LinkedIn with professional enhancements"""
+    width, height = img.size
+    
+    # Define LinkedIn aspect ratios based on content type
+    ratios = {
+        "profile": (1, 1),         # Square for profile picture
+        "post": (1200, 627),       # ~1.9:1 for post images
+        "banner": (1584, 396)      # 4:1 for banner/cover images
+    }
+    
+    if content_type not in ratios:
+        content_type = "post"  # Default to post image ratio
+        
+    target_w, target_h = ratios[content_type]
+    
+    # Calculate new dimensions
+    if (width / height) > (target_w / target_h):
+        new_width = int(height * target_w / target_h)
+        new_height = height
+        left = (width - new_width) // 2
+        top = 0
+        right = left + new_width
+        bottom = height
+    else:
+        new_width = width
+        new_height = int(width * target_h / target_w)
+        left = 0
+        top = (height - new_height) // 2
+        right = width
+        bottom = top + new_height
+    
+    # Crop to desired aspect ratio
+    img = img.crop((left, top, right, bottom))
+    
+    # Professional enhancement - more subtle than other platforms
+    img = enhance_image(img, brightness=1.15, contrast=1.15, color=0.95, sharpness=1.2)
+    
+    # Lighten shadows for better face visibility
+    # Create a slightly lightened version
+    lightened = ImageEnhance.Brightness(img).enhance(1.3)
+    
+    # Create a mask from the dark areas of the original image
+    # This helps identify shadow regions
+    gray = img.convert('L')
+    threshold = 100  # Adjust to control what's considered a shadow
+    shadow_mask = gray.point(lambda x: 255 if x < threshold else 0)
+    
+    # Blend the original with the lightened version using the shadow mask
+    shadow_mask = shadow_mask.filter(ImageFilter.GaussianBlur(radius=5))
+    shadow_mask = shadow_mask.convert('L')
+    
+    # Apply subtle vignette for professional look
+    # Create mask for vignette
+    if content_type != "banner":  # Don't apply vignette to banner images
+        width, height = img.size
+        mask = Image.new('L', (width, height), 255)
+        
+        # Generate radial gradient
+        for y in range(height):
+            for x in range(width):
+                # Distance from center (0.0 to 1.0)
+                distance = ((x - width/2)**2 + (y - height/2)**2)**0.5
+                distance = distance / ((width/2)**2 + (height/2)**2)**0.5
+                
+                # Fall off from center (1.0) to edge (0.8)
+                # The 0.8 value controls the darkness of the vignette
+                mask.putpixel((x, y), int(max(255 * (1.0 - distance * 0.2), 0)))
+        
+        # Apply vignette mask
+        img = ImageOps.multiply(img, mask.convert('RGB'))
+    
+    return img
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -119,6 +193,7 @@ def upload_file():
     file = request.files['file']
     platform = request.form.get('platform', 'instagram')
     aspect_ratio = request.form.get('aspect_ratio', '1:1')
+    linkedin_type = request.form.get('linkedin_type', 'post')
     
     if file.filename == '':
         flash('No selected file')
@@ -136,8 +211,13 @@ def upload_file():
             
             if platform == 'instagram':
                 processed_img = optimize_for_instagram(img, aspect_ratio)
-            else:  # pinterest
+            elif platform == 'pinterest':
                 processed_img = optimize_for_pinterest(img)
+            elif platform == 'linkedin':
+                processed_img = optimize_for_linkedin(img, linkedin_type)
+            else:
+                # Default to Instagram if unknown platform
+                processed_img = optimize_for_instagram(img, aspect_ratio)
             
             # Save processed image
             processed_filename = f"processed_{filename}"
